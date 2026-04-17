@@ -1,18 +1,11 @@
 import sys
-import time
 
 from n2k_decoder import (
 	_s_le,
 	_u_le,
-	IdStore,
-	N2kFastPacketReassembler,
 	decodeYachtDevices,
+	store,
 )
-
-reasm = N2kFastPacketReassembler()
-now = time.time()
-payload = None
-store = IdStore()
 
 # Read all data from stdin
 for TextString in sys.stdin:
@@ -22,8 +15,8 @@ for TextString in sys.stdin:
 
 	try:
 		if not ((TextString == "") or (TextString == "text")):
-#			CanId, data_bytes, source_id, pgn_id, dest_id, priority, payload = decodeBlueCtrlNativeCan(TextString, reasm)
-			CanId, data_bytes, source_id, pgn_id, dest_id, priority, payload = decodeYachtDevices(TextString, reasm)
+#			CanId, data_bytes, source_id, pgn_id, dest_id, priority, payload = decodeBlueCtrlNativeCan(TextString)
+			CanId, data_bytes, source_id, pgn_id, dest_id, priority, payload = decodeYachtDevices(TextString)
 
 			if payload is not None:
 				#print("CanId: ",hex(CanId),"pgn_id:",pgn_id,flush=True)
@@ -62,7 +55,6 @@ for TextString in sys.stdin:
 		print(f"Error decoding line: {TextString!r}", flush=True)
 		print(f"Split parts: {TextString.split()}", flush=True)
 		print(f"{type(e).__name__}: {e}", flush=True)
-
 
 
 

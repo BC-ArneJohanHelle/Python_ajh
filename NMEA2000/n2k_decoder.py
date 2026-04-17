@@ -89,14 +89,16 @@ def _decode_frame(canid: int, data_bytes: bytes, reasm: N2kFastPacketReassembler
 	return canid, data_bytes, source_id, pgn_id, dest_id, priority, payload
 
 
-def decodeBlueCtrlNativeCan(text: str, reasm: N2kFastPacketReassembler):
+def decodeBlueCtrlNativeCan(text: str, reasm: N2kFastPacketReassembler | None = None):
 	parts = text.split(",")
 	canid = int(parts[0], 16)
 	data_bytes = bytes(int(x, 16) for x in parts[1:])
+	if reasm is None:
+		reasm = globals()["reasm"]
 	return _decode_frame(canid, data_bytes, reasm)
 
 
-def decodeYachtDevices(text: str, reasm: N2kFastPacketReassembler):
+def decodeYachtDevices(text: str, reasm: N2kFastPacketReassembler | None = None):
 	text = text.strip()
 	if text.startswith("Parse error:"):
 		text = text[len("Parse error:") :].strip()
@@ -104,6 +106,8 @@ def decodeYachtDevices(text: str, reasm: N2kFastPacketReassembler):
 	parts = text.split(" ")
 	canid = int(parts[2], 16)
 	data_bytes = bytes(int(x, 16) for x in parts[3:])
+	if reasm is None:
+		reasm = globals()["reasm"]
 	return _decode_frame(canid, data_bytes, reasm)
 
 
@@ -149,3 +153,7 @@ def decode_payload(reasm: N2kFastPacketReassembler, pgn_id: int, source_id: int,
 	if pgn_id in FAST_PACKET_PGNS:
 		return reasm.feed(pgn_id, source_id, dest_id, data_bytes)
 	return data_bytes
+
+
+reasm = N2kFastPacketReassembler()
+store = IdStore()
