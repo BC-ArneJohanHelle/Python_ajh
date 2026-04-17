@@ -1,3 +1,4 @@
+from dataclasses import dataclass
 import time
 
 
@@ -83,10 +84,21 @@ class N2kFastPacketReassembler:
 		return None
 
 
+@dataclass
+class DecodedFrame:
+	can_id: int
+	data_bytes: bytes
+	source_id: int
+	pgn_id: int
+	dest_id: int
+	priority: int
+	payload: bytes | None
+
+
 def _decode_frame(canid: int, data_bytes: bytes, reasm: N2kFastPacketReassembler):
 	source_id, pgn_id, dest_id, priority = decodeCanId(canid)
 	payload = decode_payload(reasm, pgn_id, source_id, dest_id, data_bytes)
-	return canid, data_bytes, source_id, pgn_id, dest_id, priority, payload
+	return DecodedFrame(canid, data_bytes, source_id, pgn_id, dest_id, priority, payload)
 
 
 def decodeBlueCtrlNativeCan(text: str, reasm: N2kFastPacketReassembler | None = None):
