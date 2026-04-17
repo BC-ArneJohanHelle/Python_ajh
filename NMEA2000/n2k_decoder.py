@@ -98,7 +98,9 @@ class DecodedFrame:
 def _decode_frame(canid: int, data_bytes: bytes, reasm: N2kFastPacketReassembler):
 	source_id, pgn_id, dest_id, priority = decodeCanId(canid)
 	payload = decode_payload(reasm, pgn_id, source_id, dest_id, data_bytes)
-	return DecodedFrame(canid, data_bytes, source_id, pgn_id, dest_id, priority, payload)
+	frame = DecodedFrame(canid, data_bytes, source_id, pgn_id, dest_id, priority, payload)
+	_update_store(frame)
+	return frame
 
 
 def decodeBlueCtrlNativeCan(text: str, reasm: N2kFastPacketReassembler | None = None):
@@ -165,6 +167,11 @@ def decode_payload(reasm: N2kFastPacketReassembler, pgn_id: int, source_id: int,
 	if pgn_id in FAST_PACKET_PGNS:
 		return reasm.feed(pgn_id, source_id, dest_id, data_bytes)
 	return data_bytes
+
+
+def _update_store(frame: DecodedFrame):
+	if frame.pgn_id == 60928 and frame.payload is not None:
+		store.set(_u_le(frame.payload, 0, 8), frame.source_id)
 
 
 reasm = N2kFastPacketReassembler()

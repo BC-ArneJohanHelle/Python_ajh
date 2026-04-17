@@ -44,7 +44,6 @@ for TextString in sys.stdin:
 					#print(frame.pgn_id, frame.source_id, list(frame.payload),_u_le(frame.payload, 1, 2)*0.1,"kPa", _u_le(frame.payload, 3, 2)*0.1-273,"°C", _u_le(frame.payload, 5, 2)*0.01-273,"°C", _s_le(frame.payload, 7, 2)*0.01,"V", _s_le(frame.payload, 9, 2)*0.1,"l/h", _u_le(frame.payload, 11, 4)*1/3600,"h",_u_le(frame.payload, 15, 2)*0.1,"kPa",_u_le(frame.payload, 17, 2)*1,"kPa", flush=True)
 
 				if frame.pgn_id == 60928:
-					store.set(_u_le(frame.payload, 0, 8), frame.source_id)
 					print(store.all(),flush=True)
 					
 					print(store.get(13868994483158255951),flush=True)
@@ -55,6 +54,5 @@ for TextString in sys.stdin:
 		print(f"Error decoding line: {TextString!r}", flush=True)
 		print(f"Split parts: {TextString.split()}", flush=True)
 		print(f"{type(e).__name__}: {e}", flush=True)
-
 
 
