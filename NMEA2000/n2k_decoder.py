@@ -93,6 +93,7 @@ class DecodedFrame:
 	dest_id: int
 	priority: int
 	payload: bytes | None
+	isoname: int | None = None
 
 
 def _decode_frame(canid: int, data_bytes: bytes, reasm: N2kFastPacketReassembler):
@@ -100,6 +101,7 @@ def _decode_frame(canid: int, data_bytes: bytes, reasm: N2kFastPacketReassembler
 	payload = decode_payload(reasm, pgn_id, source_id, dest_id, data_bytes)
 	frame = DecodedFrame(canid, data_bytes, source_id, pgn_id, dest_id, priority, payload)
 	_update_store(frame)
+	frame.isoname = store.get(TARGET_ISONAME)
 	return frame
 
 
@@ -174,5 +176,6 @@ def _update_store(frame: DecodedFrame):
 		store.set(_u_le(frame.payload, 0, 8), frame.source_id)
 
 
+TARGET_ISONAME = 13868994483158255951
 reasm = N2kFastPacketReassembler()
 store = IdStore()
