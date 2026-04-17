@@ -83,14 +83,20 @@ class N2kFastPacketReassembler:
 		return None
 
 
-def decodeBlueCtrlNativeCan(text: str):
+def _decode_frame(canid: int, data_bytes: bytes, reasm: N2kFastPacketReassembler):
+	source_id, pgn_id, dest_id, priority = decodeCanId(canid)
+	payload = decode_payload(reasm, pgn_id, source_id, dest_id, data_bytes)
+	return canid, data_bytes, source_id, pgn_id, dest_id, priority, payload
+
+
+def decodeBlueCtrlNativeCan(text: str, reasm: N2kFastPacketReassembler):
 	parts = text.split(",")
 	canid = int(parts[0], 16)
 	data_bytes = bytes(int(x, 16) for x in parts[1:])
-	return canid, data_bytes
+	return _decode_frame(canid, data_bytes, reasm)
 
 
-def decodeYachtDevices(text: str):
+def decodeYachtDevices(text: str, reasm: N2kFastPacketReassembler):
 	text = text.strip()
 	if text.startswith("Parse error:"):
 		text = text[len("Parse error:") :].strip()
@@ -98,7 +104,7 @@ def decodeYachtDevices(text: str):
 	parts = text.split(" ")
 	canid = int(parts[2], 16)
 	data_bytes = bytes(int(x, 16) for x in parts[3:])
-	return canid, data_bytes
+	return _decode_frame(canid, data_bytes, reasm)
 
 
 def decodeCanId(can_id: int):

@@ -6,9 +6,7 @@ from n2k_decoder import (
 	_u_le,
 	IdStore,
 	N2kFastPacketReassembler,
-	decodeCanId,
 	decodeYachtDevices,
-	decode_payload,
 )
 
 reasm = N2kFastPacketReassembler()
@@ -24,13 +22,8 @@ for TextString in sys.stdin:
 
 	try:
 		if not ((TextString == "") or (TextString == "text")):
-#			CanId, data_bytes = decodeBlueCtrlNativeCan(TextString)
-			CanId, data_bytes = decodeYachtDevices(TextString)
-			pgn_id = 0
-			source_id, pgn_id, dest_id, priority = decodeCanId(CanId)
-			
-
-			payload = decode_payload(reasm, pgn_id, source_id, dest_id, data_bytes)
+#			CanId, data_bytes, source_id, pgn_id, dest_id, priority, payload = decodeBlueCtrlNativeCan(TextString, reasm)
+			CanId, data_bytes, source_id, pgn_id, dest_id, priority, payload = decodeYachtDevices(TextString, reasm)
 
 			if payload is not None:
 				#print("CanId: ",hex(CanId),"pgn_id:",pgn_id,flush=True)
@@ -69,7 +62,6 @@ for TextString in sys.stdin:
 		print(f"Error decoding line: {TextString!r}", flush=True)
 		print(f"Split parts: {TextString.split()}", flush=True)
 		print(f"{type(e).__name__}: {e}", flush=True)
-
 
 
 
