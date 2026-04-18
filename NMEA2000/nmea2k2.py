@@ -1,3 +1,6 @@
+"""Helpers for NMEA 2000 ."""
+
+from __future__ import annotations
 from dataclasses import dataclass
 import time
 
@@ -94,6 +97,10 @@ class DecodedFrame:
 def _decode_frame(canid: int, data_bytes: bytes, reasm: N2kFastPacketReassembler):
 	source_id, pgn_id, dest_id, priority = decodeCanId(canid)
 	payload = decode_payload(reasm, pgn_id, source_id, dest_id, data_bytes)
+	if pgn_id == 60928:
+		print("aaaaa",flush=True)
+		store.set(source_id, _u_le(payload, 0, 8))
+		print("bbbbb",flush=True)
 	return DecodedFrame(canid, source_id, pgn_id, dest_id, priority, store.get(source_id), payload)
 
 

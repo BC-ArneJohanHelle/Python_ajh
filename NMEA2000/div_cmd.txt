@@ -1,0 +1,1 @@
+/bin/iascontroller --dds_spy|grep TextSignalFud|awk -F 'engineeringValue=' '{print $2}'|python3 convert_3.py
