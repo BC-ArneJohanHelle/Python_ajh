@@ -20,10 +20,6 @@ class IdStore:
 	def get(self, id):
 		return self._data.get(id)
 
-	def delete(self, id):
-		if id in self._data:
-			del self._data[id]
-
 	def all(self):
 		return self._data.copy()
 
@@ -92,13 +88,14 @@ class DecodedFrame:
 	pgn_id: int
 	dest_id: int
 	priority: int
+	isoname: int | None
 	payload: bytes | None
 
 
 def _decode_frame(canid: int, data_bytes: bytes, reasm: N2kFastPacketReassembler):
 	source_id, pgn_id, dest_id, priority = decodeCanId(canid)
 	payload = decode_payload(reasm, pgn_id, source_id, dest_id, data_bytes)
-	return DecodedFrame(canid, data_bytes, source_id, pgn_id, dest_id, priority, payload)
+	return DecodedFrame(canid, data_bytes, source_id, pgn_id, dest_id, priority, store.get(source_id), payload)
 
 
 def decodeBlueCtrlNativeCan(text: str, reasm: N2kFastPacketReassembler | None = None):
