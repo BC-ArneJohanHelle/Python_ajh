@@ -5,12 +5,51 @@ from dataclasses import dataclass
 import time
 
 
-def _u_le(buffer: bytes, offset: int, size: int):
-	return int.from_bytes(buffer[offset:offset + size], "little", signed=False)
+def read_unsigned_le_bytes(buffer: bytes, byte_offset: int, byte_length: int):
+	"""Read an unsigned little-endian integer from a byte-addressed field."""
+	return int.from_bytes(buffer[byte_offset:byte_offset + byte_length], "little", signed=False)
 
 
-def _s_le(buffer: bytes, offset: int, size: int):
-	return int.from_bytes(buffer[offset:offset + size], "little", signed=True)
+def read_signed_le_bytes(buffer: bytes, byte_offset: int, byte_length: int):
+	"""Read a signed little-endian integer from a byte-addressed field."""
+	return int.from_bytes(buffer[byte_offset:byte_offset + byte_length], "little", signed=True)
+
+
+def read_unsigned_le_bits(buffer: bytes, bit_offset: int, bit_length: int):
+	"""Read an unsigned little-endian integer from a bit-addressed field.
+
+	Bit offsets are counted from the payload LSB upward:
+	`bit_offset == 0` is bit 0 of `buffer[0]`, `bit_offset == 8` is bit 0 of
+	`buffer[1]`, and so on.
+	"""
+	if bit_length <= 0:
+		raise ValueError("bit_length must be positive")
+	start_byte = bit_offset // 8
+	end_bit = bit_offset + bit_length
+	end_byte = (end_bit + 7) // 8
+	value = int.from_bytes(buffer[start_byte:end_byte], "little", signed=False)
+	shift = bit_offset % 8
+	return (value >> shift) & ((1 << bit_length) - 1)
+
+
+def read_signed_le_bits(buffer: bytes, bit_offset: int, bit_length: int):
+	"""Read a signed little-endian integer from a bit-addressed field.
+
+	This uses the same bit numbering as `read_unsigned_le_bits()` and applies
+	two's-complement sign extension over `bit_length`.
+	"""
+	unsigned_value = read_unsigned_le_bits(buffer, bit_offset, bit_length)
+	sign_bit = 1 << (bit_length - 1)
+	if unsigned_value & sign_bit:
+		return unsigned_value - (1 << bit_length)
+	return unsigned_value
+
+
+# Backward-compatible helper aliases.
+_read_unsigned_le_bytes = read_unsigned_le_bytes
+_read_signed_le_bytes = read_signed_le_bytes
+_read_unsigned_le_bits = read_unsigned_le_bits
+_read_signed_le_bits = read_signed_le_bits
 
 
 class IsoNameStore:
@@ -137,7 +176,7 @@ def _decode_can_frame(can_id: int, data_bytes: bytes, reassembler: N2kFastPacket
 	active_pgn_source_store.touch(pgn_id, source_id)
 	payload = decode_n2k_payload(reassembler, pgn_id, source_id, dest_id, data_bytes)
 	if pgn_id == 60928:
-		iso_name_store.set(source_id, _u_le(payload, 0, 8))
+		iso_name_store.set(source_id, read_unsigned_le_bytes(payload, 0, 8))
 	return DecodedFrame(can_id, source_id, pgn_id, dest_id, priority, iso_name_store.get(source_id), payload)
 
 
