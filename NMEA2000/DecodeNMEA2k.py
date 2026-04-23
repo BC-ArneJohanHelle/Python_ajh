@@ -31,10 +31,10 @@ for TextString in sys.stdin:
 				pl = f.payload
 
 				if f.pgn_id == 126992:
-					sid = pl.read_unsigned_le_bits(0, 8)
-					source = pl.read_unsigned_le_bits(8, 4)
-					date_days = pl.read_unsigned_le_bits(16, 16)
-					seconds_since_midnight = pl.read_unsigned_le_bits(32, 32) * 0.0001
+					sid = pl.to_uint(0, 8)
+					source = pl.to_uint(8, 4)
+					date_days = pl.to_uint(16, 16)
+					seconds_since_midnight = pl.to_uint(32, 32) * 0.0001
 
 					_print_header(f, "PGN 126992 (System Time) ------------")
 					_print_fields(
@@ -45,10 +45,10 @@ for TextString in sys.stdin:
 					)
 
 				if f.pgn_id == 127245:
-					instance = pl.read_unsigned_le_bits(0, 8)
-					direction_order = pl.read_unsigned_le_bits(8, 3)
-					angle_order = pl.read_signed_le_bits(16, 16) * 0.0001
-					position = pl.read_signed_le_bits(32, 16) * 0.0001
+					instance = pl.to_uint(0, 8)
+					direction_order = pl.to_uint(8, 3)
+					angle_order = pl.to_int(16, 16) * 0.0001
+					position = pl.to_int(32, 16) * 0.0001
 
 					_print_header(f, "PGN 127245 (Rudder) -----------------")
 					_print_fields(
@@ -59,11 +59,11 @@ for TextString in sys.stdin:
 					)
 
 				if f.pgn_id == 127250:
-					sid = pl.read_unsigned_le_bits(0, 8)
-					heading = pl.read_unsigned_le_bits(8, 16) * 0.0001
-					deviation = pl.read_signed_le_bits(24, 16) * 0.0001
-					variation = pl.read_signed_le_bits(40, 16) * 0.0001
-					reference = pl.read_unsigned_le_bits(56, 2)
+					sid = pl.to_uint(0, 8)
+					heading = pl.to_uint(8, 16) * 0.0001
+					deviation = pl.to_int(24, 16) * 0.0001
+					variation = pl.to_int(40, 16) * 0.0001
+					reference = pl.to_uint(56, 2)
 
 					_print_header(f, "PGN 127250 (Vessel Heading) ---------")
 					_print_fields(
@@ -75,10 +75,10 @@ for TextString in sys.stdin:
 					)
 
 				if f.pgn_id == 127257:
-					sid = pl.read_unsigned_le_bits(0, 8)
-					yaw = pl.read_signed_le_bits(8, 16) * 0.0001
-					pitch = pl.read_signed_le_bits(24, 16) * 0.0001
-					roll = pl.read_signed_le_bits(40, 16) * 0.0001
+					sid = pl.to_uint(0, 8)
+					yaw = pl.to_int(8, 16) * 0.0001
+					pitch = pl.to_int(24, 16) * 0.0001
+					roll = pl.to_int(40, 16) * 0.0001
 
 					_print_header(f, "PGN 127257 (Attitude) ---------------")
 					_print_fields(
@@ -89,10 +89,10 @@ for TextString in sys.stdin:
 					)
 
 				if f.pgn_id == 127488:
-					instance = pl.read_unsigned_le_bits(0, 8)
-					speed = pl.read_unsigned_le_bits(8, 16) * 0.25
-					boost_pressure = pl.read_unsigned_le_bits(24, 16) * 100
-					tilt_trim = pl.read_signed_le_bits(40, 8)
+					instance = pl.to_uint(0, 8)
+					speed = pl.to_uint(8, 16) * 0.25
+					boost_pressure = pl.to_uint(24, 16) * 100
+					tilt_trim = pl.to_int(40, 8)
 
 					_print_header(f, "PGN 127488 (Engine Rapid Update) ----")
 					_print_fields(
@@ -103,17 +103,17 @@ for TextString in sys.stdin:
 					)
 
 				if f.pgn_id == 127489:
-					instance = pl.read_unsigned_le_bits(0, 8)
-					oil_pressure = pl.read_unsigned_le_bits(8, 16) * 100
-					oil_temperature = pl.read_unsigned_le_bits(24, 16) * 0.1
-					temperature = pl.read_unsigned_le_bits(40, 16) * 0.01
-					alternator_potential = pl.read_signed_le_bits(56, 16) * 0.01
-					fuel_rate = pl.read_signed_le_bits(72, 16) * 0.1
-					total_engine_hours = pl.read_unsigned_le_bits(88, 32)
-					coolant_pressure = pl.read_unsigned_le_bits(120, 16) * 100
-					fuel_pressure = pl.read_unsigned_le_bits(136, 16) * 1000
-					engine_load = pl.read_signed_le_bits(192, 8)
-					engine_torque = pl.read_signed_le_bits(200, 8)
+					instance = pl.to_uint(0, 8)
+					oil_pressure = pl.to_uint(8, 16) * 100
+					oil_temperature = pl.to_uint(24, 16) * 0.1
+					temperature = pl.to_uint(40, 16) * 0.01
+					alternator_potential = pl.to_int(56, 16) * 0.01
+					fuel_rate = pl.to_int(72, 16) * 0.1
+					total_engine_hours = pl.to_uint(88, 32)
+					coolant_pressure = pl.to_uint(120, 16) * 100
+					fuel_pressure = pl.to_uint(136, 16) * 1000
+					engine_load = pl.to_int(192, 8)
+					engine_torque = pl.to_int(200, 8)
 
 					_print_header(f, "PGN 127489 (Engine Dynamic) ---------")
 					_print_fields(
@@ -131,11 +131,11 @@ for TextString in sys.stdin:
 					)
 
 				if f.pgn_id == 127501:
-					instance = pl.read_unsigned_le_bits(0, 8)
-					indicator1 = pl.read_unsigned_le_bits(8, 2)
-					indicator2 = pl.read_unsigned_le_bits(10, 2)
-					indicator3 = pl.read_unsigned_le_bits(12, 2)
-					indicator4 = pl.read_unsigned_le_bits(14, 2)
+					instance = pl.to_uint(0, 8)
+					indicator1 = pl.to_uint(8, 2)
+					indicator2 = pl.to_uint(10, 2)
+					indicator3 = pl.to_uint(12, 2)
+					indicator4 = pl.to_uint(14, 2)
 
 					_print_header(f, "PGN 127501 (Binary Switch Bank) -----")
 					_print_fields(
@@ -147,9 +147,9 @@ for TextString in sys.stdin:
 					)
 
 				if f.pgn_id == 127505:
-					instance = pl.read_unsigned_le_bits(0, 8)
-					level = pl.read_unsigned_le_bits(8, 16) * 0.004
-					type_ = pl.read_unsigned_le_bits(24, 8)
+					instance = pl.to_uint(0, 8)
+					level = pl.to_uint(8, 16) * 0.004
+					type_ = pl.to_uint(24, 8)
 
 					_print_header(f, "PGN 127505 (Fluid Level) ------------")
 					_print_fields(
@@ -159,10 +159,10 @@ for TextString in sys.stdin:
 					)
 
 				if f.pgn_id == 127507:
-					instance = pl.read_unsigned_le_bits(0, 8)
-					charger_state = pl.read_unsigned_le_bits(8, 8)
-					voltage = pl.read_unsigned_le_bits(16, 16) * 0.01
-					current = pl.read_signed_le_bits(32, 16) * 0.1
+					instance = pl.to_uint(0, 8)
+					charger_state = pl.to_uint(8, 8)
+					voltage = pl.to_uint(16, 16) * 0.01
+					current = pl.to_int(32, 16) * 0.1
 
 					_print_header(f, "PGN 127507 (Charger Status) ---------")
 					_print_fields(
@@ -173,10 +173,10 @@ for TextString in sys.stdin:
 					)
 
 				if f.pgn_id == 127508:
-					instance = pl.read_unsigned_le_bits(0, 8)
-					voltage = pl.read_signed_le_bits(8, 16) * 0.01
-					current = pl.read_signed_le_bits(24, 16) * 0.1
-					temperature = pl.read_unsigned_le_bits(40, 16) * 0.01
+					instance = pl.to_uint(0, 8)
+					voltage = pl.to_int(8, 16) * 0.01
+					current = pl.to_int(24, 16) * 0.1
+					temperature = pl.to_uint(40, 16) * 0.01
 
 					_print_header(f, "PGN 127508 (Battery Status) ---------")
 					_print_fields(
@@ -187,10 +187,10 @@ for TextString in sys.stdin:
 					)
 
 				if f.pgn_id == 127509:
-					instance = pl.read_unsigned_le_bits(0, 8)
-					battery_voltage = pl.read_unsigned_le_bits(8, 16) * 0.01
-					battery_current = pl.read_signed_le_bits(24, 16) * 0.1
-					battery_temp = pl.read_unsigned_le_bits(40, 16) * 0.01
+					instance = pl.to_uint(0, 8)
+					battery_voltage = pl.to_uint(8, 16) * 0.01
+					battery_current = pl.to_int(24, 16) * 0.1
+					battery_temp = pl.to_uint(40, 16) * 0.01
 
 					_print_header(f, "PGN 127509 (Battery Status Extended) ")
 					_print_fields(
@@ -201,26 +201,26 @@ for TextString in sys.stdin:
 					)
 
 				if f.pgn_id == 128259:
-					speed = pl.read_unsigned_le_bits(0, 16) * 0.01
+					speed = pl.to_uint(0, 16) * 0.01
 
 					_print_header(f, "PGN 128259 (Speed) ------------------")
 					_print_fields(("speed", f"{speed:.2f} m/s"))
 
 				if f.pgn_id == 128267:
-					depth = pl.read_unsigned_le_bits(8, 32) * 0.01
+					depth = pl.to_uint(8, 32) * 0.01
 
 					_print_header(f, "PGN 128267 (Depth) ------------------")
 					_print_fields(("depth", f"{depth:.2f} m"))
 
 				if f.pgn_id == 128275:
-					log = pl.read_unsigned_le_bits(0, 32)
+					log = pl.to_uint(0, 32)
 
 					_print_header(f, "PGN 128275 (Distance Log) -----------")
 					_print_fields(("log", log))
 
 				if f.pgn_id == 129025:
-					latitude = pl.read_signed_le_bits(0, 32) * 1e-7
-					longitude = pl.read_signed_le_bits(32, 32) * 1e-7
+					latitude = pl.to_int(0, 32) * 1e-7
+					longitude = pl.to_int(32, 32) * 1e-7
 
 					_print_header(f, "PGN 129025 (Position Rapid Update) --")
 					_print_fields(
@@ -229,10 +229,10 @@ for TextString in sys.stdin:
 					)
 
 				if f.pgn_id == 129026:
-					sid = pl.read_unsigned_le_bits(0, 8)
-					cog_reference = pl.read_unsigned_le_bits(8, 2)
-					cog = pl.read_unsigned_le_bits(16, 16) * 0.0001
-					sog = pl.read_unsigned_le_bits(32, 16) * 0.01
+					sid = pl.to_uint(0, 8)
+					cog_reference = pl.to_uint(8, 2)
+					cog = pl.to_uint(16, 16) * 0.0001
+					sog = pl.to_uint(32, 16) * 0.01
 
 					_print_header(f, "PGN 129026 (COG & SOG) -------------")
 					_print_fields(
@@ -243,9 +243,9 @@ for TextString in sys.stdin:
 					)
 
 				if f.pgn_id == 129033:
-					date_days = pl.read_unsigned_le_bits(0, 16)
-					seconds_since_midnight = pl.read_unsigned_le_bits(16, 32) * 0.0001
-					local_offset = pl.read_signed_le_bits(48, 16) * 60
+					date_days = pl.to_uint(0, 16)
+					seconds_since_midnight = pl.to_uint(16, 32) * 0.0001
+					local_offset = pl.to_int(48, 16) * 60
 
 					_print_header(f, "PGN 129033 (Time & Date) -----------")
 					_print_fields(
@@ -255,9 +255,9 @@ for TextString in sys.stdin:
 					)
 
 				if f.pgn_id == 129038:
-					mmsi = pl.read_unsigned_le_bits(8, 32)
-					sog = pl.read_unsigned_le_bits(42, 10) * 0.1
-					cog = pl.read_unsigned_le_bits(52, 12) * 0.0001
+					mmsi = pl.to_uint(8, 32)
+					sog = pl.to_uint(42, 10) * 0.1
+					cog = pl.to_uint(52, 12) * 0.0001
 
 					_print_header(f, "PGN 129038 (AIS Class A Position) ---")
 					_print_fields(
@@ -267,8 +267,8 @@ for TextString in sys.stdin:
 					)
 
 				if f.pgn_id == 129039:
-					mmsi = pl.read_unsigned_le_bits(8, 32)
-					sog = pl.read_unsigned_le_bits(46, 10) * 0.1
+					mmsi = pl.to_uint(8, 32)
+					sog = pl.to_uint(46, 10) * 0.1
 
 					_print_header(f, "PGN 129039 (AIS Class B Position) ---")
 					_print_fields(
@@ -277,8 +277,8 @@ for TextString in sys.stdin:
 					)
 
 				if f.pgn_id == 130306:
-					wind_speed = pl.read_unsigned_le_bits(8, 16) * 0.01
-					wind_angle = pl.read_unsigned_le_bits(24, 16) * 0.0001
+					wind_speed = pl.to_uint(8, 16) * 0.01
+					wind_angle = pl.to_uint(24, 16) * 0.0001
 
 					_print_header(f, "PGN 130306 (Wind) -------------------")
 					_print_fields(
@@ -287,18 +287,18 @@ for TextString in sys.stdin:
 					)
 
 				if f.pgn_id == 130310:
-					temp = pl.read_unsigned_le_bits(8, 16) * 0.01
+					temp = pl.to_uint(8, 16) * 0.01
 
 					_print_header(f, "PGN 130310 (Temperature) ------------")
 					_print_fields(("temperature", f"{temp:.2f} K"))
 
 				if f.pgn_id == 130311:
-					sid = pl.read_unsigned_le_bits(0, 8)
-					temperature_source = pl.read_unsigned_le_bits(8, 6)
-					humidity_source = pl.read_unsigned_le_bits(14, 2)
-					temperature = pl.read_unsigned_le_bits(16, 16) * 0.01
-					humidity = pl.read_signed_le_bits(32, 16) * 0.004
-					atmospheric_pressure = pl.read_unsigned_le_bits(48, 16) * 100
+					sid = pl.to_uint(0, 8)
+					temperature_source = pl.to_uint(8, 6)
+					humidity_source = pl.to_uint(14, 2)
+					temperature = pl.to_uint(16, 16) * 0.01
+					humidity = pl.to_int(32, 16) * 0.004
+					atmospheric_pressure = pl.to_uint(48, 16) * 100
 
 					_print_header(f, "PGN 130311 (Environmental) ---------")
 					_print_fields(
@@ -311,16 +311,16 @@ for TextString in sys.stdin:
 					)
 
 				if f.pgn_id == 130312:
-					temp = pl.read_unsigned_le_bits(8, 16) * 0.01
+					temp = pl.to_uint(8, 16) * 0.01
 
 					_print_header(f, "PGN 130312 (Temperature) ------------")
 					_print_fields(("temperature", f"{temp:.2f} K"))
 
 				if f.pgn_id == 130314:
-					sid = pl.read_unsigned_le_bits(0, 8)
-					instance = pl.read_unsigned_le_bits(8, 8)
-					source = pl.read_unsigned_le_bits(16, 8)
-					pressure = pl.read_signed_le_bits(24, 32) * 0.1
+					sid = pl.to_uint(0, 8)
+					instance = pl.to_uint(8, 8)
+					source = pl.to_uint(16, 8)
+					pressure = pl.to_int(24, 32) * 0.1
 
 					_print_header(f, "PGN 130314 (Actual Pressure) -------")
 					_print_fields(
@@ -331,11 +331,11 @@ for TextString in sys.stdin:
 					)
 
 				if f.pgn_id == 130316:
-					sid = pl.read_unsigned_le_bits(0, 8)
-					instance = pl.read_unsigned_le_bits(8, 8)
-					source = pl.read_unsigned_le_bits(16, 8)
-					temperature = pl.read_unsigned_le_bits(24, 24) * 0.001
-					set_temperature = pl.read_unsigned_le_bits(48, 16) * 0.1
+					sid = pl.to_uint(0, 8)
+					instance = pl.to_uint(8, 8)
+					source = pl.to_uint(16, 8)
+					temperature = pl.to_uint(24, 24) * 0.001
+					set_temperature = pl.to_uint(48, 16) * 0.1
 
 					_print_header(f, "PGN 130316 (Temp Extended Range) ---")
 					_print_fields(
@@ -347,8 +347,8 @@ for TextString in sys.stdin:
 					)
 
 				if f.pgn_id == 130934:
-					alert_id = pl.read_unsigned_le_bits(0, 16)
-					alert_state = pl.read_unsigned_le_bits(16, 8)
+					alert_id = pl.to_uint(0, 16)
+					alert_state = pl.to_uint(16, 8)
 
 					_print_header(f, "PGN 130934 (Alert) ------------------")
 					_print_fields(
@@ -357,8 +357,8 @@ for TextString in sys.stdin:
 					)
 
 				if f.pgn_id == 130935:
-					alert_id = pl.read_unsigned_le_bits(0, 16)
-					command = pl.read_unsigned_le_bits(16, 8)
+					alert_id = pl.to_uint(0, 16)
+					command = pl.to_uint(16, 8)
 
 					_print_header(f, "PGN 130935 (Alert Response) ---------")
 					_print_fields(
