@@ -45,6 +45,16 @@ def read_signed_le_bits(buffer: bytes, bit_offset: int, bit_length: int):
 	return unsigned_value
 
 
+class Payload(bytes):
+	"""Decoded payload bytes with convenience bit readers."""
+
+	def read_unsigned_le_bits(self, bit_offset: int, bit_length: int):
+		return read_unsigned_le_bits(self, bit_offset, bit_length)
+
+	def read_signed_le_bits(self, bit_offset: int, bit_length: int):
+		return read_signed_le_bits(self, bit_offset, bit_length)
+
+
 # Backward-compatible helper aliases.
 _read_unsigned_le_bytes = read_unsigned_le_bytes
 _read_signed_le_bytes = read_signed_le_bytes
@@ -168,7 +178,7 @@ class DecodedFrame:
 	dest_id: int
 	priority: int
 	iso_name: int | None
-	payload: bytes | None
+	payload: Payload | None
 
 
 def _decode_can_frame(can_id: int, data_bytes: bytes, reassembler: N2kFastPacketReassembler):
@@ -248,8 +258,9 @@ def decode_n2k_payload(
 	data_bytes: bytes,
 ):
 	if pgn_id in FAST_PACKET_PGNS:
-		return reassembler.push_frame(pgn_id, source_id, dest_id, data_bytes)
-	return data_bytes
+		payload = reassembler.push_frame(pgn_id, source_id, dest_id, data_bytes)
+		return None if payload is None else Payload(payload)
+	return Payload(data_bytes)
 
 
 def decodeBlueCtrlNativeCan(text: str, reasm: N2kFastPacketReassembler | None = None):
