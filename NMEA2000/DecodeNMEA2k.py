@@ -1,6 +1,6 @@
 import sys
 
-from nmea2k import (
+from x_nmea2k_v1 import (
 	decode_bluectrl_native_can,
 )
 
