@@ -158,6 +158,28 @@ for TextString in sys.stdin:
 						("level", f"{level:.3f}"),
 					)
 
+				if f.pgn_id == 127506:
+					sid = pl.to_uint(0, 8)
+					instance = pl.to_uint(8, 8)
+					dc_type = pl.to_uint(16, 8)
+					state_of_charge = pl.to_uint(24, 8)
+					state_of_health = pl.to_uint(32, 8)
+					time_remaining = pl.to_uint(40, 16) * 60
+					ripple_voltage = pl.to_uint(56, 16) * 0.001
+					remaining_capacity = pl.to_uint(72, 16) * 3600
+
+					_print_header(f, "PGN 127506 (DC Detailed Status) -----")
+					_print_fields(
+						("sid", sid),
+						("instance", instance),
+						("dc_type", dc_type),
+						("state_of_charge", f"{state_of_charge} %"),
+						("state_of_health", f"{state_of_health} %"),
+						("time_remaining", f"{time_remaining} s"),
+						("ripple_voltage", f"{ripple_voltage:.3f} V"),
+						("remaining_capacity", f"{remaining_capacity} C"),
+					)
+
 				if f.pgn_id == 127507:
 					instance = pl.to_uint(0, 8)
 					charger_state = pl.to_uint(8, 8)
