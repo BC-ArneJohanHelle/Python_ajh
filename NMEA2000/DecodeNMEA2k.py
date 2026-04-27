@@ -19,6 +19,13 @@ def _print_fields(*items):
 		print(f"{last_label:<20}: {last_value}", flush=True)
 
 
+def _decode_string_fix(payload, bit_offset: int, bit_length: int):
+	start = bit_offset // 8
+	end = start + (bit_length // 8)
+	raw = bytes(payload[start:end])
+	return raw.rstrip(b"@\x00\xff ").decode("utf-8", errors="replace")
+
+
 for TextString in sys.stdin:
 	TextString = TextString.strip()
 	if not TextString:
@@ -42,6 +49,28 @@ for TextString in sys.stdin:
 						("source", source),
 						("date_days", date_days),
 						("time", f"{seconds_since_midnight:.4f} s"),
+					)
+
+				if f.pgn_id == 126996:
+					nmea2000_version = pl.to_uint(0, 16) * 0.001
+					product_code = pl.to_uint(16, 16)
+					model_id = _decode_string_fix(pl, 32, 256)
+					software_version_code = _decode_string_fix(pl, 288, 256)
+					model_version = _decode_string_fix(pl, 544, 256)
+					model_serial_code = _decode_string_fix(pl, 800, 256)
+					certification_level = pl.to_uint(1056, 8)
+					load_equivalency = pl.to_uint(1064, 8)
+
+					_print_header(f, "PGN 126996 (Product Information) ---")
+					_print_fields(
+						("nmea2000_version", f"{nmea2000_version:.3f}"),
+						("product_code", product_code),
+						("model_id", model_id),
+						("software_version", software_version_code),
+						("model_version", model_version),
+						("model_serial", model_serial_code),
+						("certification_level", certification_level),
+						("load_equivalency", load_equivalency),
 					)
 
 				if f.pgn_id == 127245:
@@ -386,6 +415,32 @@ for TextString in sys.stdin:
 					_print_fields(
 						("alert_id", alert_id),
 						("command", command),
+					)
+
+				if f.pgn_id == 60928:
+					unique_number = pl.to_uint(0, 21)
+					manufacturer_code = pl.to_uint(21, 11)
+					device_instance_lower = pl.to_uint(32, 3)
+					device_instance_upper = pl.to_uint(35, 5)
+					device_function = pl.to_uint(40, 8)
+					spare = pl.to_uint(48, 1)
+					device_class = pl.to_uint(49, 7)
+					system_instance = pl.to_uint(56, 4)
+					industry_group = pl.to_uint(60, 3)
+					arbitrary_address_capable = pl.to_uint(63, 1)
+
+					_print_header(f, "PGN 60928 (ISO Address Claim) ------")
+					_print_fields(
+						("unique_number", unique_number),
+						("manufacturer_code", manufacturer_code),
+						("device_instance_lower", device_instance_lower),
+						("device_instance_upper", device_instance_upper),
+						("device_function", device_function),
+						("spare", spare),
+						("device_class", device_class),
+						("system_instance", system_instance),
+						("industry_group", industry_group),
+						("arbitrary_address", arbitrary_address_capable),
 					)
 
 	except Exception as e:
