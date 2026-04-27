@@ -36,6 +36,15 @@ class Payload(bytes):
 			return unsigned_value - (1 << bit_length)
 		return unsigned_value
 
+	def to_string_fix(self, bit_offset: int, bit_length: int):
+		"""Read a fixed-length string and trim common trailing pad bytes."""
+		if bit_length <= 0 or (bit_length % 8) != 0:
+			raise ValueError("bit_length must be a positive multiple of 8")
+		start = bit_offset // 8
+		end = start + (bit_length // 8)
+		raw = bytes(self[start:end])
+		return raw.rstrip(b"@\x00\xff ").decode("utf-8", errors="replace")
+
 
 class IsoNameStore:
 	def __init__(self):

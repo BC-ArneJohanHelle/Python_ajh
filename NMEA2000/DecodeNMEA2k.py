@@ -19,13 +19,6 @@ def _print_fields(*items):
 		print(f"{last_label:<20}: {last_value}", flush=True)
 
 
-def _decode_string_fix(payload, bit_offset: int, bit_length: int):
-	start = bit_offset // 8
-	end = start + (bit_length // 8)
-	raw = bytes(payload[start:end])
-	return raw.rstrip(b"@\x00\xff ").decode("utf-8", errors="replace")
-
-
 for TextString in sys.stdin:
 	TextString = TextString.strip()
 	if not TextString:
@@ -54,10 +47,10 @@ for TextString in sys.stdin:
 				if f.pgn_id == 126996:
 					nmea2000_version = pl.to_uint(0, 16) * 0.001
 					product_code = pl.to_uint(16, 16)
-					model_id = _decode_string_fix(pl, 32, 256)
-					software_version_code = _decode_string_fix(pl, 288, 256)
-					model_version = _decode_string_fix(pl, 544, 256)
-					model_serial_code = _decode_string_fix(pl, 800, 256)
+					model_id = pl.to_string_fix(32, 256)
+					software_version_code = pl.to_string_fix(288, 256)
+					model_version = pl.to_string_fix(544, 256)
+					model_serial_code = pl.to_string_fix(800, 256)
 					certification_level = pl.to_uint(1056, 8)
 					load_equivalency = pl.to_uint(1064, 8)
 
