@@ -22,7 +22,11 @@ class Payload(bytes):
 		end_byte = (end_bit + 7) // 8
 		value = int.from_bytes(self[start_byte:end_byte], "little", signed=False)
 		shift = bit_offset % 8
-		return (value >> shift) & ((1 << bit_length) - 1)
+		mask = (1 << bit_length) - 1
+		unsigned_value = (value >> shift) & mask
+		if unsigned_value == mask:
+			return None
+		return unsigned_value
 
 	def to_int(self, bit_offset: int, bit_length: int):
 		"""Read a signed little-endian integer from a bit-addressed field.
@@ -31,6 +35,8 @@ class Payload(bytes):
 		two's-complement sign extension over `bit_length`.
 		"""
 		unsigned_value = self.to_uint(bit_offset, bit_length)
+		if unsigned_value is None:
+			return None
 		sign_bit = 1 << (bit_length - 1)
 		if unsigned_value & sign_bit:
 			return unsigned_value - (1 << bit_length)
