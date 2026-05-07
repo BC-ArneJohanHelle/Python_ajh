@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 from dataclasses import dataclass
+from datetime import datetime
 import time
 
 
@@ -296,6 +297,33 @@ def encode_bluectrl_iso_request(source_id: int, dest_id: int, request_pgn: int):
 	return f"{can_id:08X},{data_text}"
 
 
+def encode_yacht_devices_iso_request(source_id: int, dest_id: int, request_pgn: int):
+	"""Build a PGN 59904 (ISO Request) frame in Yacht Devices-style text format.
+
+	This reuses the same CAN ID and 3-byte little-endian PGN payload as
+	`encode_bluectrl_iso_request()`, but wraps it in a transmit-form Yacht
+	Devices text line.
+
+	Example:
+	`encode_yacht_devices_iso_request(0xFF, 0xFF, 126996)` ->
+	`"21:31:42.671 T 18EAFFFF 14 F0 01"`
+	"""
+	if not 0 <= source_id <= 0xFF:
+		raise ValueError("source_id must be in range 0..255")
+	if not 0 <= dest_id <= 0xFF:
+		raise ValueError("dest_id must be in range 0..255")
+	if not 0 <= request_pgn <= 0x3FFFF:
+		raise ValueError("request_pgn must be in range 0..262143")
+
+	priority = 6
+	iso_request_pgn = 0xEA00
+	can_id = (priority << 26) | (iso_request_pgn << 8) | (dest_id << 8) | source_id
+	request_bytes = request_pgn.to_bytes(3, "little", signed=False)
+	data_text = " ".join(f"{byte:02X}" for byte in request_bytes)
+	timestamp_text = datetime.now().strftime("%H:%M:%S.%f")[:-3]
+	return f"{timestamp_text} T {can_id:08X} {data_text}"
+
+
 FAST_PACKET_PGNS = {
 	126208, 126464, 126720, 126983, 126984, 126985, 126986, 126987, 126988,
 	126996, 126998, 127233, 127237, 127489, 127490, 127491, 127494, 127495,
@@ -344,6 +372,10 @@ def decodeCanId(can_id: int):
 
 def encodeBlueCtrlIsoRequest(source_id: int, dest_id: int, request_pgn: int):
 	return encode_bluectrl_iso_request(source_id, dest_id, request_pgn)
+
+
+def encodeYachtDevicesIsoRequest(source_id: int, dest_id: int, request_pgn: int):
+	return encode_yacht_devices_iso_request(source_id, dest_id, request_pgn)
 
 
 def decode_payload(reasm: N2kFastPacketReassembler, pgn_id: int, source_id: int, dest_id: int, data_bytes: bytes):
