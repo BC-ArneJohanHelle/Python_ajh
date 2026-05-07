@@ -25,7 +25,7 @@ class Payload(bytes):
 		mask = (1 << bit_length) - 1
 		unsigned_value = (value >> shift) & mask
 		if unsigned_value == mask:
-			return None
+			return float("nan")
 		return unsigned_value
 
 	def to_int(self, bit_offset: int, bit_length: int):
@@ -35,8 +35,8 @@ class Payload(bytes):
 		two's-complement sign extension over `bit_length`.
 		"""
 		unsigned_value = self.to_uint(bit_offset, bit_length)
-		if unsigned_value is None:
-			return None
+		if unsigned_value != unsigned_value:
+			return unsigned_value
 		sign_bit = 1 << (bit_length - 1)
 		if unsigned_value & sign_bit:
 			return unsigned_value - (1 << bit_length)
