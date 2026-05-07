@@ -8,6 +8,20 @@ import time
 class Payload(bytes):
 	"""Decoded payload bytes with convenience bit readers."""
 
+	def __new__(
+		cls,
+		value: bytes,
+		*,
+		iso_name: int | None = None,
+		model_id: str | None = None,
+		model_version: str | None = None,
+	):
+		obj = super().__new__(cls, value)
+		obj.iso_name = iso_name
+		obj.model_id = model_id
+		obj.model_version = model_version
+		return obj
+
 	def to_uint(self, bit_offset: int, bit_length: int):
 		"""Read an unsigned little-endian integer from a bit-addressed field.
 
@@ -52,15 +66,32 @@ class Payload(bytes):
 		return raw.rstrip(b"@\x00\xff ").decode("utf-8", errors="replace")
 
 
+@dataclass
+class DeviceInfo:
+	iso_name: int | None = None
+	model_id: str | None = None
+	model_version: str | None = None
+
+
 class IsoNameStore:
 	def __init__(self):
 		self._data = {}
 
 	def set(self, source_id: int, iso_name: int):
-		self._data[source_id] = iso_name
+		device_info = self._data.setdefault(source_id, DeviceInfo())
+		device_info.iso_name = iso_name
+
+	def set_product_info(self, source_id: int, model_id: str, model_version: str):
+		device_info = self._data.setdefault(source_id, DeviceInfo())
+		device_info.model_id = model_id
+		device_info.model_version = model_version
 
 	def get(self, source_id: int):
-		return self._data.get(source_id)
+		device_info = self._data.get(source_id)
+		return None if device_info is None else device_info.iso_name
+
+	def get_device_info(self, source_id: int):
+		return self._data.get(source_id, DeviceInfo())
 
 	def as_dict(self):
 		return self._data.copy()
@@ -168,6 +199,8 @@ class DecodedFrame:
 	dest_id: int
 	priority: int
 	iso_name: int | None
+	model_id: str | None
+	model_version: str | None
 	payload: Payload | None
 
 
@@ -175,9 +208,31 @@ def _decode_can_frame(can_id: int, data_bytes: bytes, reassembler: N2kFastPacket
 	source_id, pgn_id, dest_id, priority = decode_can_id(can_id)
 	active_pgn_source_store.touch(pgn_id, source_id)
 	payload = decode_n2k_payload(reassembler, pgn_id, source_id, dest_id, data_bytes)
-	if pgn_id == 60928:
+	if pgn_id == 60928 and payload is not None:
 		iso_name_store.set(source_id, int.from_bytes(payload[:8], "little", signed=False))
-	return DecodedFrame(can_id, source_id, pgn_id, dest_id, priority, iso_name_store.get(source_id), payload)
+	if pgn_id == 126996 and payload is not None:
+		iso_name_store.set_product_info(
+			source_id,
+			payload.to_string_fix(32, 256),
+			payload.to_string_fix(544, 256),
+		)
+
+	device_info = iso_name_store.get_device_info(source_id)
+	if payload is not None:
+		payload.iso_name = device_info.iso_name
+		payload.model_id = device_info.model_id
+		payload.model_version = device_info.model_version
+	return DecodedFrame(
+		can_id,
+		source_id,
+		pgn_id,
+		dest_id,
+		priority,
+		device_info.iso_name,
+		device_info.model_id,
+		device_info.model_version,
+		payload,
+	)
 
 
 def decode_bluectrl_native_can(text: str, reassembler: N2kFastPacketReassembler | None = None):

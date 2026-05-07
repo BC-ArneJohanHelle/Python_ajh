@@ -9,6 +9,8 @@ def _print_header(f, title: str):
 	print(f"\n{title}")
 	print(f"source_id           : {f.source_id}")
 	print(f"iso_name            : {f.iso_name}")
+	print(f"model_id            : {f.model_id}")
+	print(f"model_version       : {f.model_version}")
 
 
 def _print_fields(*items):
